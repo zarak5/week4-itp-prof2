@@ -4,12 +4,12 @@ var mongoose = require('mongoose');
 var geocoder = require('geocoder'); // geocoder library
 
 // our db model
-var Animal = require("../models/model.js");
+var Project = require("../models/model.js");
 
 // simple route to render am HTML form that can POST data to our server
 // NOTE that this is not a standard API route, and is really just for testing
-router.get('/create-pet', function(req,res){
-  res.render('pet-form.html')
+router.get('../create-project', function(req,res){
+  res.render('project-form.html')
 })
 
 router.get('/create-pet-location', function(req,res){
@@ -18,8 +18,8 @@ router.get('/create-pet-location', function(req,res){
 
 // simple route to render an HTML page that pulls data from our server and displays it on a page
 // NOTE that this is not a standard API route, and is really for testing
-router.get('/show-pets', function(req,res){
-  res.render('show-pets.html')
+router.get('/show-projects', function(req,res){
+  res.render('show-projects.html')
 })
 
 /**
@@ -52,48 +52,44 @@ router.post('/api/create', function(req, res){
 
     // pull out the information from the req.body
     var name = req.body.name;
-    var age = req.body.age;
+    var courseName = req.body.courseName;
     var tags = req.body.tags.split(","); // split string into array
-    var weight = req.body.weight;
-    var color = req.body.color;
+    //var weight = req.body.weight;
+    //var color = req.body.color;
     var url = req.body.url;
 
     // hold all this data in an object
     // this object should be structured the same way as your db model
-    var animalObj = {
+    var projectObj = {
       name: name,
-      age: age,
+      courseName: courseName,
       tags: tags,
-      description: {
-        weight: weight,
-        color: color
-      },
       url: url
     };
 
     // create a new animal model instance, passing in the object
-    var animal = new Animal(animalObj);
+    var project = new Project(projectObj);
 
     // now, save that animal instance to the database
     // mongoose method, see http://mongoosejs.com/docs/api.html#model_Model-save
-    animal.save(function(err,data){
+    project.save(function(err,data){
       // if err saving, respond back with error
       if (err){
         var error = {status:'ERROR', message: 'Error saving animal'};
         return res.json(error);
       }
 
-      console.log('saved a new animal!');
+      console.log('saved a new project!');
       console.log(data);
 
       // now return the json data of the new animal
       var jsonData = {
         status: 'OK',
-        animal: data
+        project: data
       }
 
       //return res.json(jsonData);
-      return res.redirect('/show-pets')
+      return res.redirect('/show-projects')
 
     })
 });
@@ -138,7 +134,7 @@ router.get('/api/get/:id', function(req, res){
 router.get('/api/get', function(req, res){
 
   // mongoose method to find all, see http://mongoosejs.com/docs/api.html#model_Model.find
-  Animal.find(function(err, data){
+  Project.find(function(err, data){
     // if err or no animals found, respond with error
     if(err || data == null){
       var error = {status:'ERROR', message: 'Could not find animals'};
