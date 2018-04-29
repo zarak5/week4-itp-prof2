@@ -35,9 +35,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 // our routes will be contained in routes/index.js
 var routes = require('./routes/index');
 app.use('/', routes);
- //app.get('/',function (req,res){
-  //res.render ('pet-form.html');
- //})
+ // app.get('/',function (req,res){
+ //  res.render ('pet-form.html');
+ // })
 
  //app.get('/',function (req,res){
   //res.render ('project-form.html');

@@ -8,7 +8,7 @@ var Project = require("../models/model.js");
 
 // simple route to render am HTML form that can POST data to our server
 // NOTE that this is not a standard API route, and is really just for testing
-router.get('../create-project', function(req,res){
+router.get('/create-project', function(req,res){
   res.render('project-form.html')
 })
 
@@ -57,6 +57,8 @@ router.post('/api/create', function(req, res){
     //var weight = req.body.weight;
     //var color = req.body.color;
     var url = req.body.url;
+    var imgName = req.body.imgName;
+    //var date = req.body.date;
 
     // hold all this data in an object
     // this object should be structured the same way as your db model
@@ -64,7 +66,9 @@ router.post('/api/create', function(req, res){
       name: name,
       courseName: courseName,
       tags: tags,
-      url: url
+      url: url,
+      //date: date,
+      // imgName: imgName
     };
 
     // create a new animal model instance, passing in the object
@@ -106,18 +110,18 @@ router.get('/api/get/:id', function(req, res){
   var requestedId = req.params.id;
 
   // mongoose method, see http://mongoosejs.com/docs/api.html#model_Model.findById
-  Animal.findById(requestedId, function(err,data){
+  Project.findById(requestedId, function(err,data){
 
     // if err or no user found, respond with error
     if(err || data == null){
-      var error = {status:'ERROR', message: 'Could not find that animal'};
+      var error = {status:'ERROR', message: 'Could not find that project'};
        return res.json(error);
     }
 
     // otherwise respond with JSON data of the animal
     var jsonData = {
       status: 'OK',
-      animal: data
+      project: data
     }
 
     return res.json(jsonData);
@@ -137,7 +141,7 @@ router.get('/api/get', function(req, res){
   Project.find(function(err, data){
     // if err or no animals found, respond with error
     if(err || data == null){
-      var error = {status:'ERROR', message: 'Could not find animals'};
+      var error = {status:'ERROR', message: 'Could not find projects'};
       return res.json(error);
     }
 
@@ -145,7 +149,7 @@ router.get('/api/get', function(req, res){
 
     var jsonData = {
       status: 'OK',
-      animals: data
+       projects: data
     }
 
     res.json(jsonData);
@@ -166,7 +170,7 @@ router.get('/api/search', function(req,res){
   console.log("we are searching for " + searchTerm);
 
   // let's find that animal
-  Animal.find({name: searchTerm}, function(err,data){
+  Project.find({name: searchTerm}, function(err,data){
     // if err, respond with error
     if(err){
       var error = {status:'ERROR', message: 'Something went wrong'};
@@ -183,7 +187,7 @@ router.get('/api/search', function(req,res){
 
     var jsonData = {
       status: 'OK',
-      animals: data
+      projects: data
     }
 
     res.json(jsonData);
@@ -206,7 +210,8 @@ router.post('/api/update/:id', function(req, res){
    var dataToUpdate = {}; // a blank object of data to update
 
     // pull out the information from the req.body and add it to the object to update
-    var name, age, weight, color, url;
+    //var name, age, weight, color, url;
+    var name, courseName, tags, url, date;
 
     // we only want to update any field if it actually is contained within the req.body
     // otherwise, leave it alone.
@@ -215,12 +220,17 @@ router.post('/api/update/:id', function(req, res){
       // add to object that holds updated data
       dataToUpdate['name'] = name;
     }
-    if(req.body.age) {
-      age = req.body.age;
+    if(req.body.courseName) {
+      age = req.body.courseName;
       // add to object that holds updated data
-      dataToUpdate['age'] = age;
+      dataToUpdate['courseName'] = courseName;
     }
-    if(req.body.weight) {
+    // if(req.body.date) {
+      //date = req.body.date;
+      // add to object that holds updated data
+     // dataToUpdate['date'] = date;
+
+    /*if(req.body.weight) {
       weight = req.body.weight;
       // add to object that holds updated data
       dataToUpdate['description'] = {};
@@ -231,12 +241,7 @@ router.post('/api/update/:id', function(req, res){
       // add to object that holds updated data
       if(!dataToUpdate['description']) dataToUpdate['description'] = {};
       dataToUpdate['description']['color'] = color;
-    }
-    if(req.body.url) {
-      url = req.body.url;
-      // add to object that holds updated data
-      dataToUpdate['url'] = url;
-    }
+    }*/
 
     var tags = []; // blank array to hold tags
     if(req.body.tags){
@@ -245,25 +250,38 @@ router.post('/api/update/:id', function(req, res){
       dataToUpdate['tags'] = tags;
     }
 
+    if(req.body.url) {
+      url = req.body.url;
+      // add to object that holds updated data
+      dataToUpdate['url'] = url;
+    }
+
+    /*var tags = []; // blank array to hold tags
+    if(req.body.tags){
+      tags = req.body.tags.split(","); // split string into array
+      // add to object that holds updated data
+      dataToUpdate['tags'] = tags;
+    }*/
+
 
     console.log('the data to update is ' + JSON.stringify(dataToUpdate));
 
     // now, update that animal
     // mongoose method findByIdAndUpdate, see http://mongoosejs.com/docs/api.html#model_Model.findByIdAndUpdate
-    Animal.findByIdAndUpdate(requestedId, dataToUpdate, function(err,data){
+    Project.findByIdAndUpdate(requestedId, dataToUpdate, function(err,data){
       // if err saving, respond back with error
       if (err){
-        var error = {status:'ERROR', message: 'Error updating animal'};
+        var error = {status:'ERROR', message: 'Error updating project'};
         return res.json(error);
       }
 
-      console.log('updated the animal!');
+      console.log('updated the project!');
       console.log(data);
 
       // now return the json data of the new animal
       var jsonData = {
         status: 'OK',
-        animal: data
+        project: data
       }
 
       return res.json(jsonData);
@@ -284,9 +302,9 @@ router.get('/api/delete/:id', function(req, res){
   var requestedId = req.params.id;
 
   // Mongoose method to remove, http://mongoosejs.com/docs/api.html#model_Model.findByIdAndRemove
-  Animal.findByIdAndRemove(requestedId,function(err, data){
+  Project.findByIdAndRemove(requestedId,function(err, data){
     if(err || data == null){
-      var error = {status:'ERROR', message: 'Could not find that animal to delete'};
+      var error = {status:'ERROR', message: 'Could not find that project to delete'};
       return res.json(error);
     }
 
@@ -304,12 +322,12 @@ router.get('/api/delete/:id', function(req, res){
 
 // examples of a GET route using an HTML template
 
-router.get('/pets', function(req,res){
+router.get('/projects', function(req,res){
 
-  Animal.find(function(err, data){
+  Project.find(function(err, data){
     // if err or no animals found, respond with error
     if(err || data == null){
-      var error = {status:'ERROR', message: 'Could not find animals'};
+      var error = {status:'ERROR', message: 'Could not find projects'};
       return res.json(error);
     }
 
@@ -317,7 +335,7 @@ router.get('/pets', function(req,res){
 
     var templateData = {
       status: 'OK',
-      animals: data
+      projects: data
     }
 
     res.render('pet-template.html',templateData);
@@ -335,17 +353,18 @@ router.get('/edit/:id', function(req,res){
   var requestedId = req.params.id;
 
   // mongoose method, see http://mongoosejs.com/docs/api.html#model_Model.findById
-  Animal.findById(requestedId, function(err,data){
+  Project.findById(requestedId, function(err,data){
     // if err or no user found, respond with error
     if(err || data == null){
-      var error = {status:'ERROR', message: 'Could not find that animal'};
+      var error = {status:'ERROR', message: 'Could not find that project'};
        return res.json(error);
     }
 
     // otherwise preprate data of the animal
+    console.log(data)
     var templateData = data;
 
-    return res.render('edit-form.html', templateData);
+    return res.render('project-form.html', templateData);
 
   })
 })
@@ -356,23 +375,21 @@ router.post('/api/create/location', function(req, res){
 
     // pull out the information from the req.body
     var name = req.body.name;
-    var age = req.body.age;
+    var courseName = req.body.courseName;
     var tags = req.body.tags.split(","); // split string into array
-    var weight = req.body.weight;
-    var color = req.body.color;
+    //var weight = req.body.weight;
+    //var color = req.body.color;
     var url = req.body.url;
+    //var date = req.body.date;
     var location = req.body.location;
 
     // hold all this data in an object
     // this object should be structured the same way as your db model
-    var animalObj = {
+    var projectObj = {
       name: name,
-      age: age,
+      courseName: courseName,
       tags: tags,
-      description: {
-        weight: weight,
-        color: color
-      },
+      //date: date,
       url: url
     };
 
@@ -395,31 +412,31 @@ router.post('/api/create/location', function(req, res){
       var lat = data.results[0].geometry.location.lat;
 
       // now, let's add this to our animal object from above
-      animalObj.location = {
+      projectObj.location = {
         geo: [lon,lat], // need to put the geo co-ordinates in a lng-lat array for saving
         name: data.results[0].formatted_address // the location name
       }
 
       // now, let's save it to the database
       // create a new animal model instance, passing in the object we've created
-      var animal = new Animal(animalObj);
+      var project = new Project(projectObj);
 
       // now, save that animal instance to the database
       // mongoose method, see http://mongoosejs.com/docs/api.html#model_Model-save
-      animal.save(function(err,data){
+      project.save(function(err,data){
         // if err saving, respond back with error
         if (err){
-          var error = {status:'ERROR', message: 'Error saving animal'};
+          var error = {status:'ERROR', message: 'Error saving project'};
           return res.json(error);
         }
 
-        console.log('saved a new animal!');
+        console.log('saved a new project!');
         console.log(data);
 
         // now return the json data of the new animal
         var jsonData = {
           status: 'OK',
-          animal: data
+          project: data
         }
 
         return res.json(jsonData);

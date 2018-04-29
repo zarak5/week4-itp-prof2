@@ -28,6 +28,8 @@ var projectSchema = new Schema({
 	courseName: String,
 	tags: [String],
 	url: String,
+	// imgName: String,
+	//date: String,
 	dateAdded : { type: Date, default: Date.now },
 })
 
